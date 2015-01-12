@@ -1,15 +1,33 @@
-<!DOCTYPE html>
+{% extends 'rango/base.html' %}
 
-{% load static %}
+{% block title %}Rango Main Page{% endblock %}
 
-<html>
-    <head>
-        <title>Rango</title>
-    </head>
-    <body>
-        <h1>Rango says...</h1>
-        hello world! <strong>{{ boldmessage }}</strong><br />
-        <a href="/rango/about">About</a>
-        <img src="{% static 'rango.jpg' %}" alt="Pic of Rango" />
-    </body>
-</html>
+{% block content %}
+    <h1>Rango - Your Source to the Internet</h1>
+    {% if user.is_authenticated %}
+        <h2>Rango says - hello {{ user.username }}!</h2>
+    {% else %}
+        <h2>Rango says - hello world!</h2>
+    {% endif %}
+
+    {% if categories %}
+        <u1>
+            {% for category in categories %}
+                <li><a href="/rango/category/{{ category.url }}">{{ category.name }}</a></li>
+            {% endfor %}
+        </u1>
+    {% else %}
+        <strong>There are no categories present.</strong>
+    {% endif %}
+
+    {% if top_five_cats %}
+        <u1>
+            <h1>Top Five Categories</h1>
+            {%for category in top_five_cats %}
+                <li><a href="/rango/category/{{ category.url }}">{{ category.name }}</a></li>
+            {% endfor %}
+        </u1>
+    {% else %}
+        <strong>There are no categories present.</strong>
+    {% endif %}
+{% endblock %}

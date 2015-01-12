@@ -1,14 +1,9 @@
-<!DOCTYPE html>
-
+{% extends 'rango/base.html' %}
 {% load static %}
 
-<html>
-    <head>
-        <title>About Page</title>
-    </head>
+{% block title %}About Page{% endblock %}
 
-    <body>
-        {{ message }} <br />
-        <img src="{%static '/media/marlonbrando.jpg'%}" alt="This is supposed to be Marlon Brando!"/>
-    </body>
-</html>
+{% block content %}
+    Number of visits to this page: {{ visits }} <br />
+    <img src="{%static '/media/marlonbrando.jpg'%}" alt="This is supposed to be Marlon Brando!"/>
+{% endblock %}
