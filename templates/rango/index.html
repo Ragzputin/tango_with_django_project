@@ -3,31 +3,38 @@
 {% block title %}Rango Main Page{% endblock %}
 
 {% block content %}
-    <h1>Rango - Your Source to the Internet</h1>
-    {% if user.is_authenticated %}
-        <h2>Rango says - hello {{ user.username }}!</h2>
-    {% else %}
-        <h2>Rango says - hello world!</h2>
-    {% endif %}
+<div class="hero-unit">
+    <h1>Ready to Rango</h1>
+    <p>Find, Add, Share and Rango useful links and resources.</p>
+</div>
 
-    {% if categories %}
-        <u1>
-            {% for category in categories %}
-                <li><a href="/rango/category/{{ category.url }}">{{ category.name }}</a></li>
-            {% endfor %}
-        </u1>
-    {% else %}
-        <strong>There are no categories present.</strong>
-    {% endif %}
-
-    {% if top_five_cats %}
-        <u1>
-            <h1>Top Five Categories</h1>
-            {%for category in top_five_cats %}
-                <li><a href="/rango/category/{{ category.url }}">{{ category.name }}</a></li>
-            {% endfor %}
-        </u1>
-    {% else %}
-        <strong>There are no categories present.</strong>
-    {% endif %}
+<div class="row-fluid">
+    <div class="span6">
+        <h2>Top Five Categories</h2>
+        {% if top_five_cats %}
+            <u1>
+                {%for category in top_five_cats %}
+                    <li><a href="/rango/category/{{ category.url }}">{{ category.name }} - {{ category.views }}</a></li>
+                {% endfor %}
+            </u1>
+        {% else %}
+            <strong>There are no categories present.</strong>
+        {% endif %}
+    </div>
+    <!--/span-->
+    <div class="span6">
+        <h2>Top Five Pages</h2>
+        {% if top_pgs %}
+            <ul>
+                {% for page in top_pgs %}
+                <li><a href="{{ page.url }}">{{ page.title }}</a> - {{ page.category }} ({{ page.views }} view(s))</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <strong>No pages at present.</strong>
+        {% endif %}
+    </div>
+    <!--/span-->
+</div>
+<!--/row-->
 {% endblock %}

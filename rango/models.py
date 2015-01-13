@@ -21,7 +21,6 @@ class Page(models.Model):
     def __unicode__(self):
         return self.title
 
-
 class UserProfile(models.Model):
     # This line is required. Links UserProfile to a User model instance.
     user = models.OneToOneField(User)

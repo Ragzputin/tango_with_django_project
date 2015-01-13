@@ -19,10 +19,12 @@ def index(request):
 
     top_five_cats = Category.objects.order_by('-views')[:5]
 
+    top_pgs = Page.objects.order_by('-views')[:5]
+
     if enc_bool == False:
         EncodeUrl(category_list, top_five_cats)
 
-    context_dict = {'categories': category_list, 'top_five_cats': top_five_cats}
+    context_dict = {'categories': category_list, 'top_five_cats': top_five_cats, 'top_pgs': top_pgs}
 
     if request.session.get('last_visit'):
         # The session has a value for the last visit
@@ -78,7 +80,6 @@ def category(request, category_name_url):
 
     except Category.DoesNotExist:
         pass
-
 
     return render_to_response('rango/category.html', context_dict, context)
 
@@ -242,7 +243,7 @@ def EncodeUrl(category_list, top_five_cats):
 
 
 def DecodeUrl(cat_url):
-    #cat_name = ''
+    cat_name = ''
     for url in cat_url_list:
         if cat_url == url:
             cat_name = url.replace('_', ' ')
