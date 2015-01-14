@@ -1,7 +1,7 @@
 import os
 
 def populate():
-    python_cat = add_cat('Python',128,64)
+    python_cat = add_cat('Python')
 
     add_page(cat=python_cat,
         title="Official Python Tutorial",
@@ -15,7 +15,7 @@ def populate():
         title="Learn Python in 10 Minutes",
         url="http://www.korokithakis.net/tutorials/python/")
 
-    php_cat = add_cat('PHP',225,78)
+    php_cat = add_cat('PHP')
 
     add_page(cat=php_cat,
         title="Official PHP Website",
@@ -29,7 +29,7 @@ def populate():
         title="Free PHP Tutorials",
         url="http://www.homeandlearn.co.uk/php/php.html")
 
-    django_cat = add_cat('Django',64,32)
+    django_cat = add_cat('Django')
 
     add_page(cat=django_cat,
         title="Official Django Tutorial",
@@ -43,7 +43,7 @@ def populate():
         title="How to Tango with Django",
         url="http://www.tangowithdjango.com/")
 
-    frame_cat = add_cat('Other Frameworks',32,16)
+    frame_cat = add_cat('Other Frameworks')
 
     add_page(cat=frame_cat,
         title="Bottle",
@@ -53,13 +53,13 @@ def populate():
         title="Flask",
         url="http://flask.pocoo.org")
 
-    comp_cat = add_cat('C',24,14)
+    comp_cat = add_cat('C')
 
     add_page(cat=comp_cat,
         title="C Programming",
         url="http://www.cprogramming.com/")
 
-    ruby_cat = add_cat('Ruby on Rails',325,67)
+    ruby_cat = add_cat('Ruby on Rails')
 
     add_page(cat=ruby_cat,
         title="Ruby on Rails Official Website",
@@ -68,6 +68,16 @@ def populate():
     add_page(cat=ruby_cat,
         title="Getting Started with Rails",
         url="http://guides.rubyonrails.org/getting_started.html")
+
+    js_cat = add_cat('JavaScript')
+
+    add_page(cat=js_cat,
+        title="Eloquent JavaScript",
+        url="http://eloquentjavascript.net/00_intro.html")
+
+    add_page(cat=js_cat,
+        title="JavaScript for Beginners at Codecademy",
+        url="http://www.codecademy.com/en/tracks/javascript")
 
     #Print out what we have added to user:
     for c in Category.objects.all():

@@ -6,22 +6,23 @@
 <div class="hero-unit">
     <h1>Ready to Rango</h1>
     <p>Find, Add, Share and Rango useful links and resources.</p>
+    <p>Visits: {{ visits }}.</p>
 </div>
 
 <div class="row-fluid">
     <div class="span6">
         <h2>Top Five Categories</h2>
         {% if top_five_cats %}
-            <u1>
-                {%for category in top_five_cats %}
+            <ul>
+                {% for category in top_five_cats %}
                     <li><a href="/rango/category/{{ category.url }}">{{ category.name }} - {{ category.views }}</a></li>
                 {% endfor %}
-            </u1>
+            </ul>
         {% else %}
             <strong>There are no categories present.</strong>
         {% endif %}
     </div>
-    <!--/span-->
+
     <div class="span6">
         <h2>Top Five Pages</h2>
         {% if top_pgs %}

@@ -1,49 +1,49 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from django.shortcuts import render_to_response
-from rango.models import Category, Page
+from rango.models import Category, Page, UserProfile
 from rango.forms import CategoryForm
 from rango.forms import PageForm
 from rango.forms import UserForm, UserProfileForm
 from datetime import datetime
+from rango.bing_search import run_query
 
-cat_url_list = []
-enc_bool = False
 
 def index(request):
+
     context = RequestContext(request)
 
-    category_list = Category.objects.all()
+    cat_list = get_category_list()
 
     top_five_cats = Category.objects.order_by('-views')[:5]
 
+    for cat in cat_list:
+        print cat.views
+
+    EncodeUrl(top_five_cats)
+
     top_pgs = Page.objects.order_by('-views')[:5]
 
-    if enc_bool == False:
-        EncodeUrl(category_list, top_five_cats)
+    context_dict = {'cat_list': cat_list, 'top_five_cats': top_five_cats, 'top_pgs': top_pgs}
 
-    context_dict = {'categories': category_list, 'top_five_cats': top_five_cats, 'top_pgs': top_pgs}
-
-    if request.session.get('last_visit'):
-        # The session has a value for the last visit
-        last_visit_time = request.session.get('last_visit')
-        visits = request.session.get('visits', 0)
-
-        if (datetime.now() - datetime.strptime(last_visit_time[:-7], "%Y-%m-%d %H:%M:%S")).days > 0:
-            request.session['visits'] = visits + 1
-            request.session['last_visit'] = str(datetime.now())
-    else:
-        # The get returns None, and the session does not have a value for the last visit.
-        request.session['last_visit'] = str(datetime.now())
-        request.session['visits'] = 1
+    Session(request)
 
     # Render and return the rendered response back to the user.
     return render_to_response('rango/index.html',context_dict,context)
 
+def get_category_list():
+    cat_list = Category.objects.all()
+    EncodeUrl(cat_list)
+
+    return cat_list
+
 def about(request):
     context = RequestContext(request)
+
+    cat_list = get_category_list()
 
     if request.session.get('last_visit'):
         last_visit_time = request.session.get('last_visit')
@@ -60,23 +60,33 @@ def about(request):
     else:
         count = 0
 
-    return render_to_response('rango/about.html', {'visits': count}, context)
+    return render_to_response('rango/about.html', {'visits': count, 'cat_list': cat_list}, context)
 
 def category(request, category_name_url):
     context = RequestContext(request)
+
+    cat_list = get_category_list()
 
     category_name = DecodeUrl(category_name_url)
 
     context_dict = {'category_name': category_name, 'category_name_url': category_name_url}
 
     try:
+        views = 0
         category = Category.objects.get(name=category_name)
+        print
+        print "category.views: ", category.views
+        views = category.views + 1
+        category.views = views
+        category.save()
 
         pages = Page.objects.filter(category=category)
 
         context_dict['pages'] = pages
 
         context_dict['category'] = category
+
+        context_dict['cat_list'] = cat_list
 
     except Category.DoesNotExist:
         pass
@@ -85,6 +95,8 @@ def category(request, category_name_url):
 
 def add_category(request):
     context = RequestContext(request)
+
+    cat_list = get_category_list()
 
     #HTTP POST
     if request.method == 'POST':
@@ -107,10 +119,12 @@ def add_category(request):
 
     # Bad form (or form details), no form supplied...
     # Render the form with error messages (if any).
-    return render_to_response('rango/add_category.html', {'form': form}, context)
+    return render_to_response('rango/add_category.html', {'form': form, 'cat_list': cat_list}, context)
 
 def add_page(request, category_name_url):
     context = RequestContext(request)
+
+    cat_list = get_category_list()
 
     category_name = DecodeUrl(category_name_url)
     if request.method == 'POST':
@@ -139,7 +153,8 @@ def add_page(request, category_name_url):
         form = PageForm()
 
     return render_to_response('rango/add_page.html', {'category_name_url': category_name_url,'category_name': \
-        category_name, 'form': form}, context)
+        category_name, 'form': form, 'cat_list': cat_list}, context)
+
 
 def register(request):
     context = RequestContext(request)
@@ -218,10 +233,40 @@ def user_login(request):
         # blank dictionary object...
         return render_to_response('rango/login.html',{},context)
 
+def search(request):
+    context = RequestContext(request)
+    result_list = []
+
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+
+        if query:
+            # Run our Bing function to get the results list!
+            result_list = run_query(query)
+
+    return render_to_response('rango/search.html', {'result_list': result_list}, context)
+
+@login_required
+def profile(request):
+    context = RequestContext(request)
+    cat_list = Category.objects.all()
+    context_dict = {'cat_list': cat_list}
+    u = User.objects.get(username=request.user)
+
+    try:
+        up = UserProfile.objects.get(user=u)
+    except:
+        up = None
+
+    context_dict['user'] = u
+    context_dict['userprofile'] = up
+    return render_to_response('rango/profile.html', context_dict, context)
+
 @login_required
 def restricted(request):
     context = RequestContext(request)
-    context_dict = {'restricted':'Since you\'re logged in, you can see this text!'}
+    cat_list = get_category_list()
+    context_dict = {'restricted':'Since you\'re logged in, you can see this text!', 'cat_list': cat_list}
     return render_to_response('rango/restricted.html',context_dict,context)
 
 @login_required
@@ -232,23 +277,25 @@ def user_logout(request):
     # Take the user back to the homepage.
     return HttpResponseRedirect('/rango/')
 
-def EncodeUrl(category_list, top_five_cats):
-    enc_bool = True
-    for category in category_list:
+def EncodeUrl(cats):
+    for category in cats:
         category.url = category.name.replace(' ','_')
-        cat_url_list.append(category.url)
-
-    for category in top_five_cats:
-        category.url = category.name.replace(' ','_')
-
 
 def DecodeUrl(cat_url):
-    cat_name = ''
-    for url in cat_url_list:
-        if cat_url == url:
-            cat_name = url.replace('_', ' ')
-            break
-
+    cat_name = cat_url.replace('_', ' ')
     return cat_name
 
+def Session(request):
+    if request.session.get('last_visit'):
+        # The session has a value for the last visit
+        last_visit_time = request.session.get('last_visit')
+        visits = request.session.get('visits', 0)
+
+        if (datetime.now() - datetime.strptime(last_visit_time[:-7], "%Y-%m-%d %H:%M:%S")).seconds > 5:
+            request.session['visits'] = visits + 1
+            request.session['last_visit'] = str(datetime.now())
+    else:
+        # The get returns None, and the session does not have a value for the last visit.
+        request.session['last_visit'] = str(datetime.now())
+        request.session['visits'] = 1
 

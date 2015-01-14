@@ -26,7 +26,8 @@
                     <div class="nav-collapse collapse">
                         <ul class="nav pull-right">
                             {% if user.is_authenticated %}
-                                <li class="navbar-text">Welcome, {{ user.username }}</li>
+                                <li class="navbar-text">Welcome,</li>
+                                <li><a href="/rango/profile/">{{ user.username }}</a></li>
                                 <li><a href="/rango/logout">Logout</a></li>
                             {% else %}
                                 <li><a href="/rango/register/">Register</a></li>
@@ -37,6 +38,7 @@
                             {% if user.is_authenticated %}
                                 <li><a href="/rango/restricted/">Restricted</a></li>
                                 <li><a href="/rango/add_category/">Add Category</a></li>
+                                <li><a href="/rango/search/">Search</a></li>
                             {% endif %}
                             <li><a href="/rango/about/">About</a></li>
                         </ul>
@@ -50,7 +52,13 @@
             <div class="row-fluid">
                 <div class="span3">
                     <div class="well sidebar-nav">
-                        <!-- Empty for the time being -->
+                        {% block sidebar %}
+                        {% endblock %}
+                        <div id="cats">
+                            {% if cat_list %}
+                            {% include 'rango/category_list.html' with cat_list=cat_list %}
+                            {% endif %}
+                        </div>
                     </div>
                     <!--/.well -->
                 </div>
@@ -72,21 +80,6 @@
             </div>
         </footer>
 
-        <div>
-            <ul>
-                {% if user.is_authenticated %}
-                <li><a href="/rango/restricted">Restricted Page</a></li>
-                <li><a href="/rango/logout">Logout</a></li>
-                <li><a href="/rango/add_category">Add a New Category</a></li>
-                {% else %}
-                <li><a href="/rango/register">Register Here</a></li>
-                <li><a href="/rango/login">Login</a></li>
-                {% endif %}
-
-                <li><a href="/rango/about/">About</a></li>
-                <li><a href="/rango/">Home Page</a></li>
-            </ul>
-        </div>
         <script src="{% static 'js/jquery-2.0.3.min.js' %}"></script>
         <script src="{% static 'js/bootstrap.min.js' %}"></script>
     </body>
